@@ -1,0 +1,4 @@
+Create server
+Create Schema
+Create Auth API for signup
+Create a general file for all the Schema and import it in a single file in order to avoid multiple imports
