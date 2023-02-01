@@ -1,6 +1,6 @@
 // Library
 import express from "express";
-import bcrypt from "bcryptjs";
+import { bcrypt } from "bcryptjs";
 // import { jwt } from "jsonwebtoken ";
 var jwt = require("jsonwebtoken");
 
@@ -20,30 +20,41 @@ method              POST
 
 Router.post("/signup", async (req, res) => {
     try {
-        const { fullName, email, password, phoneNumber } = req.body.credentials;
-        const checkUserByEmail = await UserModel.findOne({ email });
-        const checkUserByPhone = await UserModel.findOne({ phoneNumber });
-
-        // check whether email or phone exist already in DB
-        if (checkUserByEmail || checkUserByPhone) {
-            return res.json({ email: "User already exists" });
-        }
+        // using the statics
+        await UserModel.findByEmailAndPhone(req.body.credentials);
 
         // hasing the password
-        const bcryptSalt = await bcrypt.genSalt(8); // Note :  keep the saltrounds min - 8 recmommended
-        const hashedPassword = await bcrypt.hash(password, bcryptSalt);
-
-        // save to DB
-        await UserModel.create({
-            ...req.body.credentials,
-            password: hashedPassword,
-        });
+        // hashing will be done in pre
+        const newUser = await UserModel.create(req.body.credentials);
+        console.log("newUser: ", newUser);
 
         // generate JWT auth token
         // we are generating the token to login the user into his account straight away without asking him logging again
-
         // dont store password in token its not required
-        const token = jwt.sign({ user: { fullName, email } }, "zomato"); //zomato is the secret key
+        const token = newUser.generateJwtToken();
+        return res.status(200).json({ token, status: "success" });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+/*
+? route             /auth/signin
+description         signing in the user
+params              -   
+access              public
+method              POST
+*/
+
+Router.post("/signin", async (req, res) => {
+    try {
+        const user = await UserModel.findByEmailAndPassword(
+            req.body.credentials
+        );
+
+        const token = user.generateJwtToken();
+        console.log("token: ", token);
+
         return res.status(200).json({ token, status: "success" });
     } catch (error) {
         return res.status(500).json({ error: error.message });
