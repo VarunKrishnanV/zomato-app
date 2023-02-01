@@ -3,10 +3,11 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-
-
 // database connection
 import ConnectDB from "./database/connection.js";
+
+// router
+import Auth from "./API/Auth";
 
 const zomato = express();
 
@@ -25,6 +26,8 @@ zomato.use(express.urlencoded({ extended: false }));
 zomato.get("/", (req, res) => {
     res.json({ message: "server is running " });
 });
+
+zomato.use("/auth", Auth);
 
 zomato.listen(4000, () => {
     ConnectDB()

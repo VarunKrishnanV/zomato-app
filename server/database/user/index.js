@@ -24,4 +24,6 @@ const UserSchema = new mongoose.Schema(
     }
 );
 
+//  Static and  Methods
+
 export const UserModel = mongoose.model("Users", UserSchema);

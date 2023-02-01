@@ -1,15 +1,17 @@
 // Library
-import { express } from "express";
+import express from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken ";
+// import { jwt } from "jsonwebtoken ";
+var jwt = require("jsonwebtoken");
 
 // Models
 import { UserModel } from "../../database/user/index";
 
+// Router
 const Router = express.Router();
 
 /*
-? route             /signup
+? route             /auth/signup
 description         register new user
 params              -   
 access              public
@@ -18,7 +20,7 @@ method              POST
 
 Router.post("/signup", async (req, res) => {
     try {
-        const { email, password, fullName, phoneNumber } = req.body.credentials;
+        const { fullName, email, password, phoneNumber } = req.body.credentials;
         const checkUserByEmail = await UserModel.findOne({ email });
         const checkUserByPhone = await UserModel.findOne({ phoneNumber });
 
@@ -41,9 +43,11 @@ Router.post("/signup", async (req, res) => {
         // we are generating the token to login the user into his account straight away without asking him logging again
 
         // dont store password in token its not required
-        const token = jwt.sign({ user: { fullName, email } }, "zomato");
+        const token = jwt.sign({ user: { fullName, email } }, "zomato"); //zomato is the secret key
         return res.status(200).json({ token, status: "success" });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 });
+
+export default Router;
